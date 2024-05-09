@@ -29,7 +29,16 @@ class TemporalGraphConvolution(nn.Module):
             bias (bool, optional): if "True", add a learnable bias to the output. Defaults to True.
             
         Shape:
-            - Input[0]: the graph sequence in: math: (N, in_channels, T_{in}, V)
+            - Input[0]: graph sequence: math: (N, in_channels, T_{in}, V) 
+            - Input[1]: graph adjacency matrix: math: (K, V, V) format
+            - Output[0]: graph sequence: math: (N, out_channels, T_{out}, V)
+            - Output[1]: graph adjacency matrix for output data: math: (K, V, V)
+            
+            where
+                N is the batch size, 
+                K is the spatial kernel size, 
+                T_{in}/_{out} is the length of input/output sequence,
+                V is the number of vertex (graph node)
         """
         super().__init__()
         
@@ -51,7 +60,7 @@ class TemporalGraphConvolution(nn.Module):
         
         n, kc, t, v = x.size()
         x = x.view(n, self.kernel_size, kc//self.kernel_size, t, v)
-        x = torch.einsum('nkctv, kvw->nctw', (x, A))
+        x = torch.einsum('nkctv,kvw->nctw', (x, A))
         
         return x.contigous(), A
         
