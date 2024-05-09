@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class TemporalGraphConvolution(nn.Module):
-    """Implementation for a graph convolution
+    """Implementation of a graph convolution
 
     Args:
         nn (_type_): _description_
