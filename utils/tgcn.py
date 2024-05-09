@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class TemporalGraphConvolution(nn.Module):
-    """Basic module for applying a graph convolution
+    """Implementation for a graph convolution
 
     Args:
         nn (_type_): _description_
@@ -16,6 +16,21 @@ class TemporalGraphConvolution(nn.Module):
                  t_padding=1,
                  t_dilation=1, 
                  bias=True):
+        """_summary_
+
+        Args:
+            in_channels (int): number of channels in the input data sequence
+            out_channels (int): number of channels in the output data sequence
+            kernel_size (int): size of graph convolution kernel
+            t_kernel_size (int, optional): size of temporal convolution kernel. Defaults to 1.
+            t_stride (int, optional): stride of temporal convolution. Defaults to 1.
+            t_padding (int, optional): temporal zero-padding added to both sides of the input. Defaults to 1.
+            t_dilation (int, optional): spacing between temporal kernel elements. Defaults to 1.
+            bias (bool, optional): if "True", add a learnable bias to the output. Defaults to True.
+            
+        Shape:
+            - Input[0]: the graph sequence in: math: (N, in_channels, T_{in}, V)
+        """
         super().__init__()
         
         self.kernel_size = kernel_size
@@ -35,6 +50,10 @@ class TemporalGraphConvolution(nn.Module):
         x = self.conv(x)
         
         n, kc, t, v = x.size()
+        x = x.view(n, self.kernel_size, kc//self.kernel_size, t, v)
+        x = torch.einsum('nkctv, kvw->nctw', (x, A))
+        
+        return x.contigous(), A
         
         
         
