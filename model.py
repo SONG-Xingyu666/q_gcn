@@ -8,6 +8,41 @@ from utils.tgcn import TemporalGraphConvolution
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+class Model(nn.Module):
+    
+    def __init__(self,
+                 in_channels, 
+                 num_class, 
+                 graph_args,
+                 edge_inportance_weighting, 
+                 **kwargs):
+        """Spatial Temporal Graph Convolutional Networks
+
+        Args:
+            in_channels (int): number of channels of the input data
+            num_class (int): number of classes for the classifation task
+            graph_args (dict): the arguments for building the graph
+            edge_inportance_weighting (bool): if "True", adds a learnable importance weighting to the edges of the graph
+            **kargs (optional): other parameters for graph convolution units 
+            
+        Shape:
+            - Input: math: (N, in_channels, T_{in}, V_{in}, M_{in})
+            - Output: math: (N, num_class)
+            
+            where
+                N is the batch size.
+                T_{in} is the length of the input sequence,
+                V_{in} is the number of graph nodes, 
+                M_{in} is the number of instance in a frame
+        """
+        super().__init__()
+
+        # Load graph
+        self.graph = Graph(**graph_args)
+        A =torch.tensor(self.graph.A, dtype=torch.float32, requires_grad=False)
+        self.register_buffer('A',A)
+
+
 class ST_GCN(nn.Module):
     
     def __init__(self, 
