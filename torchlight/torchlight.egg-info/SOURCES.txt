@@ -1,6 +1,7 @@
-README.md
-processor/__init__.py
-processor/io.py
+setup.py
+torchlight/__init__.py
+torchlight/gpu.py
+torchlight/io.py
 torchlight.egg-info/PKG-INFO
 torchlight.egg-info/SOURCES.txt
 torchlight.egg-info/dependency_links.txt
