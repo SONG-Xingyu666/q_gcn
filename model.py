@@ -41,6 +41,49 @@ class Model(nn.Module):
         self.graph = Graph(**graph_args)
         A =torch.tensor(self.graph.A, dtype=torch.float32, requires_grad=False)
         self.register_buffer('A',A)
+        
+        # bulid networks
+        spatial_kernel_size = A.shape[0]
+        temporal_kernel_size = 9
+        kernel_size = (spatial_kernel_size, temporal_kernel_size)
+        self.data_bn = nn.BatchNorm1d(in_channels, A.size[1])
+        kwargs0 = {k: v for k,v in kwargs.items() if k !='dropout'}
+        self.st_gcn_networks = nn.ModuleList((
+            ST_GCN(in_channels, 64, kernel_size, 1, **kwargs),
+            ST_GCN(64, 64, kernel_size, 1, **kwargs),
+            ST_GCN(64, 64, kernel_size, 1, **kwargs),
+            ST_GCN(64, 64, kernel_size, 1, **kwargs),
+            ST_GCN(64, 128, kernel_size, 1, **kwargs),
+            ST_GCN(128, 128, kernel_size, 1, **kwargs),
+            ST_GCN(128, 256, kernel_size, 1, **kwargs),
+            ST_GCN(256, 256, kernel_size, 1, **kwargs),
+            ST_GCN(256, 256, kernel_size, 1, **kwargs),
+        ))
+        
+        # initialize parameters for edge importance weighting
+        if edge_inportance_weighting:
+            self.edge_importance = nn.ParameterList([
+                nn.Parameter(torch.ones(self.A.size()))
+                for i in self.st_gcn_networks
+            ])
+        else:
+            self.edge_importance = [1] * len(self.st_gcn_networks)
+            
+        # FCN for prediction
+        self.fcn = nn.Conv2d(256, num_class, kernel_size=1)
+        
+    def forward(self, x):
+        N, C, T, V, M = x.size()
+        x = x.permute(0,4,3,2,1).contiguous()
+        x = x.view(N*M, V*C, T)
+        x = self.data_bn(x)
+        x = x.view(N, M, V, C, T)
+        x = x.permute(0,1,3,4,2).contiguous()
+        x = x.view(N*M, C, T, V)
+        
+        # forward
+        for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):
+            x, _ = gcn(x, self.A * importance)
 
 
 class ST_GCN(nn.Module):
