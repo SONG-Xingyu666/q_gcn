@@ -203,3 +203,6 @@ class ST_GCN(nn.Module):
         x = self.tcn(x) + res
         
         return self.relu(x), A
+
+if __name__ == "__init__":
+    model = Model()
