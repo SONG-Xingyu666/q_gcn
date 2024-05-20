@@ -64,7 +64,9 @@ class IO():
             
                 
     def load_model(self):
-        self.model = self.io.load_model(self.arg.model, **(self.arg.model_args))
+        self.model = self.io.load_model(
+            self.arg.model, 
+            **(self.arg.model_args))
     
     def load_weights(self):
         if self.arg.weights:
@@ -108,7 +110,7 @@ class IO():
         
         # Model
         parser.add_argument('--model', default=None, help='the model will be used')
-        parser.add_argument('--model_args', action=DictAction, default=True, help='the arguments of model')
+        parser.add_argument('--model_args', action=DictAction, default=dict(), help='the arguments of model')
         parser.add_argument('--weights', default=None, help='the weights for the network initialization')
         parser.add_argument('--ignore_weights', type=str, default=[], nargs='+', help='the name of weights which will be ignored in the initializtion')
         

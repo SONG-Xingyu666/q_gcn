@@ -1,0 +1,12 @@
+# command line: /home/demachilab/repositories/q_gcn/processor/processor.py
+
+config: null
+device: 0
+ignore_weights: []
+model: null
+model_args: {}
+print_log: true
+save_log: 0
+use_gpu: true
+weights: null
+work_dir: ./work_dir/tmp

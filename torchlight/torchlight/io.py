@@ -153,7 +153,7 @@ def str2dict(v):
 
         
 def import_class(import_str):
-    mod_str, _sep, class_str = import_str.partition('.')
+    mod_str, _sep, class_str = import_str.rpartition('.')
     __import__(mod_str)
     try:
         return getattr(sys.modules[mod_str], class_str)
