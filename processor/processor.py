@@ -19,11 +19,22 @@ from .io import IO
 class Processor(IO):
     def __init__(self, argv=None):
         
-        pass
+        self.load_arg(argv=argv)
+        self.init_environment()
+        self.load_model()
+        self.load_weights()
+        self.gpu()
+        self.load_data()
+        self.load_optimizer()
     
     def init_environment(self):
-        return super().init_environment()
-    
+        super().init_environment()
+        self.result = dict()
+        self.iter_info = dict()
+        self.epoch_info = dict()
+        self.meta_info = dict(epoch=0, iter=0)
+        
+        
     def load_optimizer(self):
         pass
     
@@ -31,7 +42,24 @@ class Processor(IO):
         pass
     
     def show_wpoch_info(self):
-        pass
+        for k, v in self.epoch_info.items():
+            self.io.print_log('\t{}: {}'.format(k, v))
+        if self.arg.pavi_log:
+            self.io.log('train', self.meta_info['iter'], self.epoch_info)
+            
+    def show_iter_info(self):
+        if self.meta_info['iter'] % self.arg.log_interval == 0: 
+            info = '\tIter {} Done'.format(self.meta_info['iter'])
+            for k, v in self.iter_info.items():
+                if isinstance(v, float):
+                    info = info + ' | {}: {:.4f}'.format(k, v)
+                else:
+                    info = info + ' | {}: {}'.format(k, v)
+                    
+            self.io.print_log(info)
+            
+            if self.arg.pavi_log:
+                self.io.log('train', self.meta_info['iter'], self.iter_info)
     
     def show_iter_info(self):
         pass
