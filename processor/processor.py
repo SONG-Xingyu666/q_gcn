@@ -39,9 +39,10 @@ class Processor(IO):
         pass
     
     def load_data(self):
+        self.data_loader = None
         pass
     
-    def show_wpoch_info(self):
+    def show_epoch_info(self):
         for k, v in self.epoch_info.items():
             self.io.print_log('\t{}: {}'.format(k, v))
         if self.arg.pavi_log:
@@ -61,18 +62,65 @@ class Processor(IO):
             if self.arg.pavi_log:
                 self.io.log('train', self.meta_info['iter'], self.iter_info)
     
-    def show_iter_info(self):
-        pass
-    
     def train(self):
-        pass
+        for _ in range(100):
+            self.iter_info['loss'] = 0
+            self.show_iter_info()
+            self.meta_info['iter'] += 1
+        self.epoch_info['mean loss'] = 1
+        self.show_epoch_info()
     
     def test(self):
-        pass
+        for _ in range(100):
+            self.iter_info['loss'] = 1
+            self.show_iter_info()
+        self.epoch_info['mean loss'] = 1
+        self.show_epoch_info()
     
     def start(self):
-        return super().start()
-    
+        self.io.print_log('Parameters:\n{}\n'.format(str(vars(self.arg))))
+        
+        # traininig phase
+        if self.arg.phase == 'train':
+            for epoch in range(self.arg.start_epoch, self.arg.num_epoch):
+                self.meta_info['epoch'] = epoch
+                
+                # training
+                self.io.print_log('Training epoch: {}'.format(epoch))
+                self.train()
+                self.io.print_log('Done.')
+                
+                # save model
+                if ((epoch+1)%self.arg.save_interval==0) or (epoch+1==self.arg.num_epoch):
+                    filename = 'epoch{}_model.pt'.format(epoch+1)
+                    self.io.save_model(self.model, filename)
+                    
+                # evaluation
+                if ((epoch+1)%self.arg.save_interval==0) or (epoch+1==self.arg.num_epoch):
+                    self.io.print_log('Eval epoch: {}'.format(epoch))
+                    self.test()
+                    self.io.print_log('Done.')
+        
+        elif self.arg.phase == 'test':
+            if self.arg.weights is None:
+                raise ValueError('Please appoint --weights')
+            self.io.print_log('Model: {}.'.format(self.arg.model))
+            self.io.print_log('Weights: {}.'.format(self.arg.weights))
+            
+            # evaluation
+            self.io.print_log('Evaluation Starts:')
+            self.test()
+            self.io.print_log('Done.\n')
+            
+            # save the output of model
+            if self.arg.save_result:
+                result_dict = dict(
+                    zip(self.data_loader['test'].dataset.sample_name, self.result)
+                )    
+                self.io.save_pkl(result_dict, 'test_result.pkl')
+            
+        
+                
     @staticmethod
     def get_paser(add_help=False):
         
