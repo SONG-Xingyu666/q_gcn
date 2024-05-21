@@ -147,9 +147,9 @@ def normalize_undigraph(A):
     return DAD
     
 
-if __name__ == "__main__":
-    graph = Graph(strategy='spatial')
-    print(graph.A.shape)
+# if __name__ == "__main__":
+#     graph = Graph(strategy='spatial')
+#     print(graph.A.shape)
     
     
         
