@@ -1,5 +1,7 @@
 import sys
 import argparse
+import torch.utils
+import torch.utils.data
 import yaml
 import numpy as np
 
@@ -39,8 +41,27 @@ class Processor(IO):
         pass
     
     def load_data(self):
-        self.data_loader = None
-        pass
+        Feeder = import_class(self.arg.feeder)
+        if 'debug' not in self.arg.train_feeder_args:
+            self.arg.train_feeder_args['debug'] = self.arg.debug
+        self.data_loader = dict()
+        
+        if self.arg.phase == 'train':
+            self.data_loader['train'] = torch.utils.data.DataLoader(
+                dataset=Feeder(**self.arg.train_feeder_args),
+                batch_size=self.arg.batch_size,
+                shuffle=True,
+                num_workers=self.arg.num_worker * torchlight.ngpu(self.arg.device),
+                drop_last=True
+            )
+        
+        if self.arg.test_feeder_args:
+            self.data_loader['test'] = torch.utils.data.DataLoader(
+                dataset=Feeder(**self.arg.test_feeder_args),
+                batch_size=self.arg.batch_size,
+                shuffle=False,
+                num_workers=self.arg.num_worker * torchlight.ngpu(self.arg.device)
+            )
     
     def show_epoch_info(self):
         for k, v in self.epoch_info.items():
