@@ -7,7 +7,9 @@ import numpy as np
 from numpy.lib.format import open_memmap
 
 from utils.ntu_read_skeleton import read_xyz
-
+        
+        
+        
 training_subjects = [
     1, 2, 4, 5, 8, 9, 13, 14, 15, 16, 17, 18, 19, 25, 27, 28, 31, 34, 35, 38
 ]
