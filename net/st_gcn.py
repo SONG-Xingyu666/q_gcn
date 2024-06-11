@@ -95,7 +95,7 @@ class Model(nn.Module):
         
         return x
         
-        
+
     def feature_extraction(self, x):
         # data normalization
         N, C, T, V, M = x.size()
